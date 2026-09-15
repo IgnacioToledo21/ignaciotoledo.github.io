@@ -1,7 +1,40 @@
 "use client"
 
 import { ArrowDown, ArrowUpRight, BriefcaseBusiness, Check, Code2, Mail, Menu, MapPin, Phone, X } from "lucide-react"
-import { useEffect, useRef, useState, type ReactNode } from "react"
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react"
+
+const CONTACT_EMAIL = "ignaciosurf124@gmail.com"
+const CONTACT_FORM_URL = "https://ignaciotoledo21.github.io/"
+
+async function sendContactMessage(form: HTMLFormElement) {
+  const data = new FormData(form)
+  if (String(data.get("_honey") || "").trim()) return
+
+  const name = String(data.get("name") || "").trim()
+  const email = String(data.get("email") || "").trim()
+  const message = String(data.get("message") || "").trim()
+
+  const response = await fetch(`https://formsubmit.co/ajax/${CONTACT_EMAIL}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({
+      name,
+      email,
+      message,
+      _replyto: email,
+      _subject: `Portfolio · mensaje de ${name}`,
+      _template: "table",
+      _captcha: false,
+      _url: CONTACT_FORM_URL,
+    }),
+  })
+  const result = await response.json().catch(() => null)
+  const ok = result?.success === true || result?.success === "true"
+  const needsActivation = String(result?.message || "").toLowerCase().includes("activation")
+  if (!response.ok || (!ok && !needsActivation)) {
+    throw new Error("No se pudo enviar el mensaje")
+  }
+}
 
 function StarField() {
   const ref = useRef<HTMLCanvasElement>(null)
@@ -200,8 +233,22 @@ const skills = { Lenguajes: ["Java", "JavaScript", "TypeScript", "Python", "SQL"
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false)
-  const [sent, setSent] = useState(false)
+  const [formStatus, setFormStatus] = useState<"idle" | "sending" | "sent" | "error">("idle")
   const [tip, setTip] = useState<string | null>(null)
+
+  const onContactSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (formStatus === "sending") return
+    const form = event.currentTarget
+    setFormStatus("sending")
+    try {
+      await sendContactMessage(form)
+      form.reset()
+      setFormStatus("sent")
+    } catch {
+      setFormStatus("error")
+    }
+  }
 
   useEffect(() => {
     if (!tip) return
@@ -275,7 +322,19 @@ export default function Home() {
       </article>
     </div></div></section>
 
-    <section id="contacto" className="contact-section"><div className="section-wrap contact-grid"><div><Reveal repeat><p className="section-label">06 / Contacto</p><h2>Hagamos algo<br /><span>increíble.</span></h2><p className="muted-copy">¿Tienes una idea, un reto o simplemente quieres hablar de tecnología? Mi bandeja está abierta.</p></Reveal><div className="contact-links"><a href="mailto:ignaciosurf124@gmail.com"><Mail /> ignaciosurf124@gmail.com</a><a href="mailto:ignacioworkspace@gmail.com"><Mail /> ignacioworkspace@gmail.com</a><a href="tel:+34637029722"><Phone /> +34 637 029 722</a><span><MapPin /> Santa Cruz de Tenerife</span></div></div><form className="contact-form" onSubmit={e => { e.preventDefault(); setSent(true) }}><label>Tu nombre<input name="name" required placeholder="¿Cómo te llamas?" /></label><label>Tu email<input name="email" required type="email" placeholder="tu@email.com" /></label><label>Mensaje<textarea name="message" required rows={4} placeholder="Cuéntame sobre tu proyecto..." /></label><button className="button button-primary" type="submit">{sent ? <><Check data-icon="inline-start" /> Mensaje preparado</> : <>Enviar mensaje <ArrowUpRight data-icon="inline-end" /></>}</button></form></div></section>
+    <section id="contacto" className="contact-section"><div className="section-wrap contact-grid"><div><Reveal repeat><p className="section-label">06 / Contacto</p><h2>Hagamos algo<br /><span>increíble.</span></h2><p className="muted-copy">¿Tienes una idea, un reto o simplemente quieres hablar de tecnología? Mi bandeja está abierta.</p></Reveal><div className="contact-links"><a href={`mailto:${CONTACT_EMAIL}`}><Mail /> {CONTACT_EMAIL}</a><a href="mailto:ignacioworkspace@gmail.com"><Mail /> ignacioworkspace@gmail.com</a><a href="tel:+34637029722"><Phone /> +34 637 029 722</a><span><MapPin /> Santa Cruz de Tenerife</span></div></div>
+      <form className="contact-form" onSubmit={onContactSubmit} onInput={() => { if (formStatus !== "sending") setFormStatus("idle") }}>
+        <input className="hp" type="text" name="_honey" tabIndex={-1} autoComplete="off" aria-hidden />
+        <label>Tu nombre<input name="name" required placeholder="¿Cómo te llamas?" autoComplete="name" /></label>
+        <label>Tu email<input name="email" required type="email" placeholder="tu@email.com" autoComplete="email" /></label>
+        <label>Mensaje<textarea name="message" required rows={4} placeholder="Cuéntame sobre tu proyecto..." /></label>
+        {formStatus === "error" && <p className="form-status error" role="alert">No se pudo enviar. Inténtalo de nuevo o escríbeme a {CONTACT_EMAIL}.</p>}
+        {formStatus === "sent" && <p className="form-status ok" role="status">Mensaje enviado. Te responderé lo antes posible.</p>}
+        <button className="button button-primary" type="submit" disabled={formStatus === "sending"}>
+          {formStatus === "sending" ? "Enviando..." : formStatus === "sent" ? <><Check data-icon="inline-start" /> Mensaje enviado</> : <>Enviar mensaje <ArrowUpRight data-icon="inline-end" /></>}
+        </button>
+      </form>
+    </div></section>
     <footer className="footer section-wrap">
       <span>© 2026 Rosmel Ignacio Toledo Rangel</span>
       <nav className="footer-social" aria-label="Redes">
