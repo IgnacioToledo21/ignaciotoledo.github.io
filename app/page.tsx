@@ -1,9 +1,28 @@
 "use client"
 
 import { ArrowDown, ArrowUpRight, BriefcaseBusiness, Check, Code2, GitBranch, Mail, Menu, MapPin, Phone, Sparkles, X } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useRef, useState, type ReactNode } from "react"
 
-const nav = [["Sobre mí", "sobre-mi"], ["Experiencia", "experiencia"], ["Proyectos", "proyectos"], ["Contacto", "contacto"]]
+function Reveal({ children, className = "" }: { children: ReactNode; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const element = ref.current
+    if (!element) return
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        element.classList.add("is-visible")
+        observer.unobserve(element)
+      }
+    }, { threshold: 0.14 })
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [])
+
+  return <div ref={ref} className={`reveal ${className}`}>{children}</div>
+}
+
+const nav = [["Formación", "formacion"], ["Sobre mí", "sobre-mi"], ["Experiencia", "experiencia"], ["Proyectos", "proyectos"], ["Contacto", "contacto"]]
 const stack = ["Java", "Spring Boot", "TypeScript", "Angular", "Next.js", "Python", "SQL", "Git"]
 const skills = { Lenguajes: ["Java", "JavaScript", "TypeScript", "Python", "SQL", "PHP", "Kotlin"], Backend: ["Spring Boot", "Node.js", "APIs REST", "Firebase"], Frontend: ["Angular", "Next.js", "HTML/CSS", "JavaFX"], Datos: ["MySQL", "PostgreSQL", "MongoDB", "SQLite"] }
 
@@ -17,9 +36,11 @@ export default function Home() {
 
     <div className="marquee-wrap"><div className="marquee">{[...stack, ...stack].map((item, i) => <span key={`${item}-${i}`}>{item} <b>✦</b></span>)}</div></div>
 
-    <section id="sobre-mi" className="dark-section about-section"><div className="section-wrap about-grid"><div><p className="section-label">01 / Sobre mí</p><h2>La tecnología<br /><span>con intención.</span></h2></div><div className="about-content"><p className="big-copy">No solo escribo código. Me gusta entender el problema, ordenar el caos y construir soluciones que las personas quieran usar.</p><p className="muted-copy">Soy Técnico Superior en Desarrollo de Aplicaciones Multiplataforma y Responsable TI. Me muevo entre infraestructura, producto y desarrollo para que cada pieza encaje.</p><div className="stat-row"><div><strong>+3</strong><span>años explorando<br />tecnología</span></div><div><strong>∞</strong><span>curiosidad por<br />aprender</span></div><div><strong>24/7</strong><span>mentalidad de<br />resolver</span></div></div></div></div></section>
+    <section id="formacion" className="light-section formation-section"><div className="section-wrap"><Reveal><p className="section-label cyan">01 / Formación</p><div className="formation-heading"><h2>La base para<br /><span>seguir creciendo.</span></h2><p>Una formación práctica que conecta desarrollo, datos y producto para construir soluciones completas.</p></div></Reveal><div className="formation-card"><Reveal><p className="date">2022 — 2024</p><h3>Técnico Superior en Desarrollo de Aplicaciones Multiplataforma</h3><h4>IES Canarias — La Cuesta</h4><p>Formación especializada en desarrollo multiplataforma, bases de datos, programación y construcción de soluciones digitales.</p><div className="tag-row"><span>Java</span><span>Bases de datos</span><span>Multiplataforma</span></div></Reveal></div></div></section>
 
-    <section id="experiencia" className="light-section"><div className="section-wrap"><p className="section-label cyan">02 / Trayectoria</p><div className="experience-grid"><h2>Experiencia que<br /><span>deja huella.</span></h2><div className="timeline"><article><span className="timeline-dot" /><p className="date">MARZO 2025 — ACTUALIDAD</p><h3>Responsable TI · Operaciones TI</h3><h4>Grupo EVM</h4><p>Estabilidad y evolución del entorno tecnológico. Desarrollo de módulos para intranet, soporte técnico, inventario y administración de WordPress y Moodle.</p><div className="tag-row"><span>Infraestructura</span><span>Intranet</span><span>Soporte</span></div></article><article><span className="timeline-dot" /><p className="date">FORMACIÓN</p><h3>Desarrollo de Aplicaciones Multiplataforma</h3><h4>IES Canarias — La Cuesta</h4><p>Formación especializada en desarrollo multiplataforma, bases de datos y construcción de soluciones digitales.</p><div className="tag-row"><span>Java</span><span>Bases de datos</span><span>Multiplataforma</span></div></article></div></div></div></section>
+    <section id="sobre-mi" className="dark-section about-section"><div className="section-wrap about-grid"><div><Reveal><p className="section-label">02 / Sobre mí</p><h2>La tecnología<br /><span>con intención.</span></h2></Reveal></div><div className="about-content"><p className="big-copy">No solo escribo código. Me gusta entender el problema, ordenar el caos y construir soluciones que las personas quieran usar.</p><p className="muted-copy">Soy Técnico Superior en Desarrollo de Aplicaciones Multiplataforma y Responsable TI. Me muevo entre infraestructura, producto y desarrollo para que cada pieza encaje.</p><div className="stat-row"><div><strong>+3</strong><span>años explorando<br />tecnología</span></div><div><strong>∞</strong><span>curiosidad por<br />aprender</span></div><div><strong>24/7</strong><span>mentalidad de<br />resolver</span></div></div></div></div></section>
+
+    <section id="experiencia" className="light-section"><div className="section-wrap"><p className="section-label cyan">02 / Trayectoria</p><div className="experience-grid"><h2>Experiencia que<br /><span>deja huella.</span></h2><div className="timeline"><article><span className="timeline-dot" /><p className="date">MARZO 2025 — ACTUALIDAD</p><h3>Responsable TI · Operaciones TI</h3><h4>Grupo EVM</h4><p>Estabilidad y evolución del entorno tecnológico. Desarrollo de módulos para intranet, soporte técnico, inventario y administración de WordPress y Moodle.</p><div className="tag-row"><span>Infraestructura</span><span>Intranet</span><span>Soporte</span></div></article></div></div></div></section>
 
     <section className="dark-section stack-section"><div className="section-wrap"><div className="stack-intro"><p className="section-label">03 / Stack</p><h2>Herramientas<br /><span>para hacer.</span></h2><p>Una caja de herramientas en constante evolución, elegida para resolver cada reto con criterio.</p></div><div className="stack-cards">{Object.entries(skills).map(([title, items], i) => <div className="stack-card" key={title}><span className="card-number">0{i + 1}</span><Code2 /><h3>{title}</h3><div className="tag-row">{items.map(item => <span key={item}>{item}</span>)}</div></div>)}</div></div></section>
 
